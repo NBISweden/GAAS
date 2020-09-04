@@ -16,8 +16,8 @@ my $help;
 my $fasta = undef;
 my $version = undef;
 my $species = undef;
-#my $annotation_root = "/projects/annotation";
-my $annotation_root = "~/test_annotation/";
+my $annotation_root = "/projects/annotation";
+#my $annotation_root = "~/test_annotation/";
 my $usage = qq{
 perl $0
 	Getting help:
@@ -26,13 +26,15 @@ perl $0
 	[-s species_name]
 	[-g genome.fa]
 	[-v assembly version]
+	[-path path to project directory (default: /projects/annotation)]
 };
 
 GetOptions( 
 "help" => \$help,
 "s=s" => \$species,
 "g=s" => \$fasta,
-"v=i" => \$version);
+"v=i" => \$version,
+"path=s" => \$annotation_root);
 
 # Print Help and exit
 if ($help) {
@@ -59,24 +61,7 @@ if ( !( defined($version))){
 my $project_path = "$annotation_root/$species/";
 print "This project \" $species v.$version\" was created by \$logname = $logname on ". localtime().".\n You can find the working directory here:$project_path\n";
 
-#/refseqs
-#/repeats
-#/RNAseq
-#/ab-initio
-#/ASSEMBLY_VERSION
-#/maker
-#
-#/evidence_build
-#/gene_build_<version>
-#
-#/tophat
-#/cufflinks
-#/rfam
-#/webapollo_tracks
-#/customer_data
 
-##Prepare fasta file
-prepare_fasta($fasta);
 
 ##Resources
 make_dir($project_path, "Refseqs");
@@ -104,7 +89,11 @@ make_dir($project_path, "Transcriptome_assembly");
 make_dir("$project_path/Transcriptome_assembly", "Genome_guided");
 make_dir("$project_path/Transcriptome_assembly", "Denovo");
 
+##Prepare fasta file
+prepare_fasta($fasta);
+
 sub prepare_fasta {
+	print "$fasta $project_path/Genome/";
 	system("mv $fasta $project_path/Genome/");
 	system("ln -s $project_path/Genome/$fasta $project_path/Genome/genome.fa");
 }
