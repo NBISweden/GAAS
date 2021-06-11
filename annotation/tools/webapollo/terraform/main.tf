@@ -176,7 +176,7 @@ provisioner "remote-exec" {
       "bash $HOME/setup/install_docker.sh",
       "bash $HOME/setup/install_conda.sh",
       "echo ${var.admin_password} > ~/nbis/GAAS/annotation/tools/webapollo/apollo/apolloadminpassword",
-      "echo APOLLO_DATA_DIR=\"$(echo /mnt/*/data)\" >> $HOME/.bashrc",
+      "echo 'APOLLO_DATA_DIR=$(ls -1d /mnt/*/data | head -1)' >> $HOME/.bashrc",
       "echo export APOLLO_DATA_DIR >> $HOME/.bashrc"
     ]
 }
