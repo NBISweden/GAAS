@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # file: gaas_create_annotation_project.pl
-# Last modified: ons feb 02, 2022  02:20
+# Last modified: ons feb 02, 2022  02:24
 # Sign: Johan Nylander
 
 use strict;
@@ -11,7 +11,7 @@ use Pod::Usage;
 use File::Path qw(make_path);
 
 ## Globals
-my $annotation_root = "/home/nylander/tmp/gaas"; #"/projects/annotation"
+my $annotation_root = "/projects/annotation";
 my $default_name = "Genus_species-annotation_version-NBIS_ID";
 my $logname = $ENV{LOGNAME};
 my $time_stamp = localtime();
