@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # file: gaas_create_annotation_project.pl
-# Last modified: ons feb 02, 2022  02:24
+# Last modified: tor feb 03, 2022  11:34
 # Sign: Johan Nylander
 
 use strict;
@@ -20,7 +20,8 @@ my @folders = (
     "abinitio",
     "customer_data",
     "genome",
-    "maker",
+    "maker/maker_evidence",
+    "maker/maker_abinitio",
     "organelles",
     "repeats",
     "rfam",
@@ -67,7 +68,6 @@ if ( -e $full_path) {
 else {
     for my $folder (@folders) {
         my $f = $full_path . "/" . $folder;
-        #system("mkdir -p $f");
         make_path($f)
     }
 }
