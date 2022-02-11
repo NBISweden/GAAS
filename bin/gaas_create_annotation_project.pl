@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # file: gaas_create_annotation_project.pl
-# Last modified: fre feb 11, 2022  03:29
+# Last modified: fre feb 11, 2022  03:32
 # Sign: Johan Nylander
 
 use strict;
@@ -19,7 +19,7 @@ my $full_path = q{};
 my @folders = (
     "abinitio",
     "customer_data",
-    "genome",
+    "assembly",
     "maker/maker_evidence",
     "maker/maker_abinitio",
     "organelles",
@@ -169,10 +169,11 @@ Without any arguments, this is the expected output
 
     Genus_species-annotation_version-NBIS_ID/
         |── abinitio/
+        |── assembly/
         |── customer_data/
-        |── genome/
         |── maker/
         |── organelles/
+        |── public_data/
         |── repeats/
         |── rfam/
         |── RNAseq/
