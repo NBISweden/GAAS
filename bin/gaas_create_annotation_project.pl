@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # file: gaas_create_annotation_project.pl
-# Last modified: tor feb 03, 2022  11:34
+# Last modified: fre feb 11, 2022  03:29
 # Sign: Johan Nylander
 
 use strict;
@@ -23,6 +23,7 @@ my @folders = (
     "maker/maker_evidence",
     "maker/maker_abinitio",
     "organelles",
+    "public_data",
     "repeats",
     "rfam",
     "RNAseq");
