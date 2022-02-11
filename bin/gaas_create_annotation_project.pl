@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # file: gaas_create_annotation_project.pl
-# Last modified: fre feb 11, 2022  03:32
+# Last modified: fre feb 11, 2022  04:40
 # Sign: Johan Nylander
 
 use strict;
@@ -9,6 +9,8 @@ use warnings;
 use Getopt::Long;
 use Pod::Usage;
 use File::Path qw(make_path);
+use File::Basename;
+use File::Copy;
 
 ## Globals
 my $annotation_root = "/projects/annotation";
@@ -29,13 +31,15 @@ my @folders = (
     "RNAseq");
 
 ## Options
-my $name = undef;
 my $assembly_version = undef;
+my $copy_rnadata = undef;
+my $help = undef;
 my $id = undef;
+my $link_rnadata = undef;
+my $man = undef;
+my $name = undef;
 my $path = undef;
 my $version = undef;
-my $help = undef;
-my $man = undef;
 
 GetOptions(
     "s|name=s" => \$name,
@@ -43,6 +47,8 @@ GetOptions(
     "i|id=s" => \$id,
     "path=s" => \$path,
     "version" => \$version,
+    "copy-rnadata=s" => \$copy_rnadata,
+    "link-rnadata=s" => \$link_rnadata,
     "help" => \$help,
     "man" => \$man,
 );
@@ -72,6 +78,25 @@ else {
         make_path($f)
     }
 }
+
+## Copy or symlink rna data 
+if ($copy_rnadata || $link_rnadata) {
+    my $dest_folder = $full_path . "/" . "RNAseq";
+    die "$0 ERROR:\nFolder $dest_path does not exist.\n" unless ( -d $dest_folder);
+    if ($copy_rnadata) {
+        die "$0 ERROR:\nCan not find file $copy_rnadata.\n" unless ( -e $copy_rnadata);
+        my $file = basename($copy_rnadata);
+        my $copy = $dest_folder . "/" . $file;
+        copy($file, $copy);
+    }
+    elsif ($link_rnadata) {
+        die "$0 ERROR:\nCan not find file $link_rnadata.\n" unless ( -e $link_rnadata);
+        my $file = basename($link_rnadata);
+        my $symlink = $dest_folder . "/" . $file;
+        symlink($symlink, $link_rnadata);
+    }
+}
+
 
 ## Create README.md
 my $readme_file = $full_path . "/" . "README.md";
@@ -123,6 +148,8 @@ gaas_create_annotation_project.pl [options]
    --name               name of project
    --assembly-version   version string for genome assembly
    --id                 ID
+   --copy-rnadata       copy rnadata
+   --link-rnadata       link rnadata
    --help               brief help message
    --version            script version
    --man                full documentation
@@ -152,6 +179,14 @@ Version of the assembly used for the project
 
 ID (e.g. NBIS redmine ID)
 
+=item B<-c, --copy-rnadata=>I<string>
+
+Copy RNA data from I<string> to subfolder RNAseq
+
+=item B<-l, --link-rnadata=>I<string>
+
+Link (symbolic) RNA data from I<string> to subfolder RNAseq
+
 =item B<--help>
 
 Print a brief help message and exits
@@ -165,7 +200,7 @@ Prints the manual page and exits
 =head1 DESCRIPTION
 
 This script will create a project file hierarchy.
-Without any arguments, this is the expected output
+Without any arguments, this is the default output
 
     Genus_species-annotation_version-NBIS_ID/
         |── abinitio/
@@ -187,9 +222,10 @@ but this can be overridden by providing the full path using B<--path>.
 
 =head1 EXAMPLES
 
-    gaas_create_annotation_project.pl -n Apa_bpa
-    gaas_create_annotation_project.pl -p /full/path/to/Apa_bpa
-    gaas_create_annotation_project.pl -n Apa_bpa -a 1 -i 666
+    gaas_create_annotation_project.pl
+    gaas_create_annotation_project.pl -n Blaps_mortisaga
+    gaas_create_annotation_project.pl -p /full/path/to/Blaps_mortisaga
+    gaas_create_annotation_project.pl -n Blaps_mortisaga -a 1 -i 666 -l /path/to/RNAdata.fa
 
 =cut
 
