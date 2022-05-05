@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # file: gaas_create_annotation_project.pl
-# Last modified: fre feb 11, 2022  04:40
+# Last modified: tor maj 05, 2022  04:10
 # Sign: Johan Nylander
 
 use strict;
@@ -11,9 +11,10 @@ use Pod::Usage;
 use File::Path qw(make_path);
 use File::Basename;
 use File::Copy;
+use Cwd qw(abs_path);
 
 ## Globals
-my $annotation_root = "/projects/annotation";
+my $annotation_root = "/projects/annotation"; # For testing, change this to full path to folder with write access
 my $default_name = "Genus_species-annotation_version-NBIS_ID";
 my $logname = $ENV{LOGNAME};
 my $time_stamp = localtime();
@@ -31,20 +32,20 @@ my @folders = (
     "RNAseq");
 
 ## Options
-my $assembly_version = undef;
-my $copy_rnadata = undef;
-my $help = undef;
-my $id = undef;
-my $link_rnadata = undef;
-my $man = undef;
-my $name = undef;
-my $path = undef;
-my $version = undef;
+my $copy_rnadata;
+my $link_rnadata;
+my $assembly_version;
+my $man;
+my $help;
+my $id;
+my $name;
+my $path;
+my $version;
 
 GetOptions(
     "s|name=s" => \$name,
     "assembly-version=s" => \$assembly_version,
-    "i|id=s" => \$id,
+    "id=s" => \$id,
     "path=s" => \$path,
     "version" => \$version,
     "copy-rnadata=s" => \$copy_rnadata,
@@ -82,7 +83,7 @@ else {
 ## Copy or symlink rna data 
 if ($copy_rnadata || $link_rnadata) {
     my $dest_folder = $full_path . "/" . "RNAseq";
-    die "$0 ERROR:\nFolder $dest_path does not exist.\n" unless ( -d $dest_folder);
+    die "$0 ERROR:\nFolder $dest_folder does not exist.\n" unless ( -d $dest_folder);
     if ($copy_rnadata) {
         die "$0 ERROR:\nCan not find file $copy_rnadata.\n" unless ( -e $copy_rnadata);
         my $file = basename($copy_rnadata);
@@ -93,10 +94,10 @@ if ($copy_rnadata || $link_rnadata) {
         die "$0 ERROR:\nCan not find file $link_rnadata.\n" unless ( -e $link_rnadata);
         my $file = basename($link_rnadata);
         my $symlink = $dest_folder . "/" . $file;
-        symlink($symlink, $link_rnadata);
+        my $absfile = abs_path($link_rnadata);
+        symlink($absfile, $symlink);
     }
 }
-
 
 ## Create README.md
 my $readme_file = $full_path . "/" . "README.md";
@@ -148,8 +149,8 @@ gaas_create_annotation_project.pl [options]
    --name               name of project
    --assembly-version   version string for genome assembly
    --id                 ID
-   --copy-rnadata       copy rnadata
-   --link-rnadata       link rnadata
+   --copy-rnadata       copy rnadata file
+   --link-rnadata       link rnadata file
    --help               brief help message
    --version            script version
    --man                full documentation
@@ -179,13 +180,13 @@ Version of the assembly used for the project
 
 ID (e.g. NBIS redmine ID)
 
-=item B<-c, --copy-rnadata=>I<string>
+=item B<-c, --copy-rnadata=>I<FILE>
 
-Copy RNA data from I<string> to subfolder RNAseq
+Copy RNA data from I<FILE> to subfolder RNAseq
 
-=item B<-l, --link-rnadata=>I<string>
+=item B<-l, --link-rnadata=>I<FILE>
 
-Link (symbolic) RNA data from I<string> to subfolder RNAseq
+Link (symbolic) RNA data from I<FILE> to subfolder RNAseq
 
 =item B<--help>
 
@@ -203,16 +204,18 @@ This script will create a project file hierarchy.
 Without any arguments, this is the default output
 
     Genus_species-annotation_version-NBIS_ID/
-        |── abinitio/
-        |── assembly/
-        |── customer_data/
-        |── maker/
-        |── organelles/
-        |── public_data/
-        |── repeats/
-        |── rfam/
-        |── RNAseq/
-        |── README.md
+        L abinitio/
+        L assembly/
+        L customer_data/
+        L maker/
+            L maker_abinitio/
+            L maker_evidence/
+        L organelles/
+        L public_data/
+        L repeats/
+        L rfam/
+        L RNAseq/
+        L README.md
 
 The name of the parent folder can be changed using the B<--name> or the
 B<--path> options (B<--path> will have precedence over B<--name>).
