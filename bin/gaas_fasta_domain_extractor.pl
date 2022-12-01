@@ -5,6 +5,8 @@ use warnings;
 use Pod::Usage;
 use Getopt::Long;
 use IO::File;
+use Bio::DB::Fasta;
+use Bio::Perl;
 use GAAS::GAAS;
 
 my $header_nbis = get_gaas_header();
@@ -13,6 +15,7 @@ my $outputFile;
 my $nameSeq;
 my $start;
 my $end;
+my $revcom;
 my $opt_help = 0;
 
 Getopt::Long::Configure ('bundling');
@@ -21,6 +24,7 @@ if ( !GetOptions (  'i|f|fasta|input_file=s' => \$inputFile,
 					'o|output=s' => \$outputFile,
 					's|start=i' => \$start,
 					'e|end=i' => \$end,
+					'r|revcom!' => \$revcom,
 					'h|help!'         => \$opt_help )  )
 {
     pod2usage( { -message => 'Failed to parse command line',
@@ -29,7 +33,7 @@ if ( !GetOptions (  'i|f|fasta|input_file=s' => \$inputFile,
 }
 
 if ($opt_help) {
-    pod2usage( { -verbose => 2,
+    pod2usage( { -verbose => 99,
                  -exitval => 0,
                  -message => "$header_nbis\n" } );
 }
@@ -60,53 +64,27 @@ else{
       croak( sprintf( "Can not open STDOUT for writing: %s", $! ) );
 }
 
-my $nbSeq=0;
-my $seq="";
-my $headerCurrent="";
-my $header="";
-my $headerFound="no";
-while (my $line = readline(*$ref_istream)) {
-	$line=~ s/\s//g;
-	if($line =~ m/^>/){
-		$nbSeq++; $header=$headerCurrent; $headerCurrent=$line;
-		if( ($nbSeq > 1) && (!defined($nameSeq)) ){
-			print "The input file is an MultiFasta file.\nPlease specify the name of the sequence you are interested in (-n <name>)\n";exit;
-			}
-		elsif( ($nbSeq > 1) && (defined($nameSeq)) ) {
-			if(($nameSeq eq $header) or (">".$nameSeq eq $header)){
-				$headerFound="yes";
-				last;
-			}
-		$seq="";
-		}
-	}
-	else{
-		if($nbSeq > 0){ #first sequence encountered. We can begin to collect sequence data
-			$seq.=$line;
-			}
-	}
+##### MAIN ####
+#### read fasta file and save info in memory
+######################
+my $db = Bio::DB::Fasta->new($inputFile);
+my $seq=undef;
+print ("Genome fasta parsed\n");
+
+
+if($db->seq($nameSeq)){
+  #create sequence object
+  my $seqobj  = $db->get_Seq_by_id($nameSeq);
+  $seq=$seqobj->seq();
 }
-$header=$headerCurrent;
-if($headerFound eq "no"){
-	if( ($nbSeq > 1) && (!defined($nameSeq)) ){
-		print "The input file is an MultiFasta file.\nPlease specify the name of the sequence you are interested in (-n <name>)\n";exit;
-	}
-	elsif( ($nbSeq > 1) && (defined($nameSeq)) ){
-		if(($nameSeq eq $header) or (">".$nameSeq eq $header)){
-			$headerFound="yes";
-		}
-	}
-	elsif ($nbSeq == 1){
-		$header=$headerCurrent;
-	}
+else{
+  print "<$nameSeq> not found into the $inputFile fasta file !\n";
+  exit;
 }
 
-if( ($nbSeq > 1) && (defined($nameSeq)) && ($headerFound eq "no") ){
-		print "The header you specified >$nameSeq< doesn't exist in this MultiFasta file.\nPlease check it.\n";exit;
-}
 
-print "Name studied sequence: $header\n";
-#print "sequence: $seq\n";
+print "Name studied sequence: $nameSeq\n";
+print "sequence length: ".length($seq)."\n";
 if($start<0 || $end <0){print "Start and End cannot be a negative value!\n"; exit;}
 if(length($seq) < $start){print "Start position for extraction is over the sequence size !\n"; exit;}
 if(length($seq) < $end){print "End position for extraction is over the sequence size !\n"; exit;}
@@ -118,6 +96,11 @@ $start=$start-1;
 my $lengtExtraction=$end-$start; #Length in 0-based coordinate (in 1-based coordinate we must add +1)
 print "Length sequence extracted: $lengtExtraction\n";
 my $extractedPart=substr($seq, $start, $lengtExtraction);
+if($revcom){
+	 $extractedPart = reverse $extractedPart;
+	 $extractedPart =~ tr/ATGCatgc/TACGtacg/;
+}
+
 if ($outputFile){
 	print $ostream $extractedPart;
 }
@@ -135,14 +118,13 @@ gaas_domainExtractor.pl
 
 The script allows to extract region in a fasta file.
 The script takes as input a (multi)fasta file and coordinates of part that you want extract.
-If the Input file is a MultiFastaFile you have to specify to the script the header of the sequence you want to extract.
 NOTE: The script expect the use of 1-based coordinate system. So, -s 1 -e 1 extract the first AA/nt
 /!\ Some file formats are 1-based (GFF, SAM, VCF) and others are 0-based (BED, BAM)
 /!\ Ensembl uses 1-based coordinate system when UCSC uses 0-based coordinate system
 /!\ Be aware of what kind of coordinate you are using as input.
 Rule of coordinate system
 	1-based coordinate system = Numbers nucleotides directly
-  0-based coordinate system = Numbers between nucleotides
+    0-based coordinate system = Numbers between nucleotides
 
 =head1 SYNOPSIS
 
@@ -155,19 +137,23 @@ Rule of coordinate system
 
 =item B<-i>, B<--file> or B<-ref>
 
-Input fasta file that will be read.
+String - Input fasta file that will be read.
 
 =item B<-s> or B<--start>
 
-Start coordinate of the region that will be extract
+Integer - Start coordinate of the region that will be extract
 
 =item B<-e> or B<--end>
 
-End coordinate of the region that will be extract
+Integer - End coordinate of the region that will be extract
 
 =item B<-n> or B<--name>
 
-In Multifasta file case, the name allows to specify which sequence you are interested in.
+String - In Multifasta file case, the name allows to specify which sequence you are interested in.
+
+=item B<-r> or B<--revcom>
+
+Boolean - reverse complement the output sequence.
 
 =item B<-o> or B<--output>
 
