@@ -20,7 +20,7 @@ use GAAS::GAAS;
 
 my $header = get_gaas_header();
 my $nb_seq = 0;
-my $problemcount=0;
+my %seq_with_N_at_start_or_end;
 my $nbseq_withLowerCase=0;
 my $total_lowerCaseCount;
 my $Ncount=0;
@@ -103,10 +103,10 @@ while( my $seqObj = $inseq->next_seq() ) {
 
   #Check for Ns at the beginning or end of sequence
   if ($sequence =~ /^N/){
-    $problemcount++;
+    $seq_with_N_at_start_or_end{$seqObj->display_id}++;
   }
   if ($sequence =~ /N$/){
-    $problemcount++;
+    $seq_with_N_at_start_or_end{$seqObj->display_id}++;
   }
   if (length($sequence) > 1000){
    	$cp1kb++;
@@ -252,7 +252,8 @@ $stingToPrint .= "|".sizedPrint("Nb of internal N-regions (possibly links betwee
 $stingToPrint .= "|".sizedPrint("Nb of long internal N-regions >$size_internal_N",57,"L")."|".sizedPrint("",20)."|\n";
 $stingToPrint .= "|".sizedPrint("/!\\ This is problematic for Genemark",57,"L")."|".sizedPrint("$nb_long_internal_N",20)."|\n$lineB";
 $stingToPrint .= "|".sizedPrint("Nb of pure (only) N sequences",57,"L")."|".sizedPrint("$pureNseq",20)."|\n$lineB";
-$stingToPrint .= "|".sizedPrint("Nb of sequences that begin or end with Ns",57,"L")."|".sizedPrint("$problemcount",20)."|\n$lineB";
+my $nb_seq_with_N_at_start_or_end= scalar keys %seq_with_N_at_start_or_end;
+$stingToPrint .= "|".sizedPrint("Nb of sequences that begin or end with Ns",57,"L")."|".sizedPrint("$nb_seq_with_N_at_start_or_end",20)."|\n$lineB";
 my $GC_content = sprintf("%.1f",$GCpercentage);
 $stingToPrint .= "|".sizedPrint("GC-content (%)",57,"L")."|".sizedPrint("$GC_content",20)."|\n$lineB";
 my $GC_content2 = sprintf("%.1f",$GCnoNs);
