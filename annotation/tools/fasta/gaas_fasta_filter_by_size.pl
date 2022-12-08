@@ -20,8 +20,8 @@ my $opt_size = 1000;
 
 # OPTION MANAGMENT
 my @copyARGV=@ARGV;
-if ( !GetOptions( 'f|fa|fasta=s' => \$opt_fastafile,
-                  's|size=s' => \$opt_size,
+if ( !GetOptions( 'f|fa|fasta=s'    => \$opt_fastafile,
+                  's|size=s'        => \$opt_size,
                   'o|output=s'      => \$opt_output,
                   'h|help!'         => \$opt_help ) )
 {
@@ -48,9 +48,7 @@ if (! (defined($opt_fastafile)) ) {
 
 my $ostream;
 if ($opt_output) {
-  $opt_output=~ s/.fasta//g;
-  $opt_output=~ s/.fa//g;
-  open(my $fh, '>', $opt_output.".fa") or die "Could not open file '$opt_output' $!";
+  open(my $fh, '>', $opt_output) or die "Could not open file '$opt_output' $!";
   $ostream= Bio::SeqIO->new(-fh => $fh, -format => 'Fasta' );
 }
 else{
