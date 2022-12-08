@@ -19,7 +19,7 @@ use GAAS::Grid::Sbatch;
 use GAAS::GAAS;
 
 my $header = get_gaas_header();
-my $rfam_cm_file = "/projects/references/databases/rfam/14.6/Rfam.cm"; #cm models to be annotated by tRNAscan
+my $rfam_cm_file = "/projects/references/databases/rfam/14.9/Rfam.cm"; #cm models to be annotated by tRNAscan
 my $gff_formatter = Bio::Tools::GFF->new(-gff_version => 3);
 my $queue=undef;
 my $outdir = "rfam_output";
