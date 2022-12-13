@@ -143,7 +143,7 @@ resource "null_resource" "provision" {
   }
 
 provisioner "file" {
-    source      = "tmp/annotation-cluster/ansible-ubuntu-18.04/roles/common/files/authorized-keys"
+    source      = "tmp/annotation-cluster/ansible-playbooks/roles/common/files/authorized-keys"
     destination = "/home/${var.ssh_user}"
   }
 
