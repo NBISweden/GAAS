@@ -317,6 +317,10 @@ Input fasta file containing DNA sequences.
 
 Integer. Filter the sequence shorter to this size (in bp). Default: 1000
 
+=item B<--clean-header>
+
+When provided, keeps only the identifier (text before the first space) in FASTA headers, removing any description that follows.
+
 =item  B<--out>, B<--output> or B<-o>
 
 [OPTIONAL] Output directory where diffrent output files will be written. If no output is specified, the result will written to STDOUT.
