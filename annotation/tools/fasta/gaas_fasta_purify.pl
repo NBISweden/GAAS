@@ -105,6 +105,7 @@ my $nb_long_internal_N = 0;
 #Calculate the statistics from the entries in the hash
 while( my $seqObj = $inseq->next_seq() ) {
   $nb_seq++;
+  $seqObj->desc("");
   my $sequence = $seqObj->seq();
   $size_in += length($sequence);
 
