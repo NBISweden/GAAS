@@ -21,12 +21,14 @@ my $header = get_gaas_header();
 my $opt_infile;
 my $opt_size=1000;
 my $opt_dirRes;
+my $opt_clean_header = 0;
 my $opt_help = 0;
 
 
 if ( !GetOptions( 'f|infile=s' => \$opt_infile,
                   's|size=i' => \$opt_size,
                   'o|out|output=s' => \$opt_dirRes,
+                  'clean-header!'  => \$opt_clean_header,
                   'h|help!'        => \$opt_help ) )
 {
     pod2usage( { -message => "$header\nFailed to parse command line",
@@ -105,7 +107,7 @@ my $nb_long_internal_N = 0;
 #Calculate the statistics from the entries in the hash
 while( my $seqObj = $inseq->next_seq() ) {
   $nb_seq++;
-  $seqObj->desc("");
+  if ($opt_clean_header) { $seqObj->desc(""); }
   my $sequence = $seqObj->seq();
   $size_in += length($sequence);
 
